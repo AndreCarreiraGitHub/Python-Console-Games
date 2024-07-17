@@ -13,6 +13,9 @@ columns, _ = shutil.get_terminal_size()
 #Create a line that spans the width of the screen
 line = '_' * columns
 
+winRPS=0
+loseRPS=0
+
 #Setting up colours
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -94,13 +97,15 @@ result = rock_paper_scissor_ai(answerInt)
 
 if result == 1:
     print(f"{GREEN}You win!{RESET}")
+    winRPS+=1
 elif result == 2:
     print(f"{RED}You lost...{RESET}")
+    loseRPS+=1
 elif result == 3:
     print(f"{YELLOW}A draw...{RESET}")
     
 print("")
 print(line)
 print("")
-    
+
 subprocess.run(["python", "main.py"])
