@@ -1,26 +1,9 @@
 import subprocess
 import random
-import shutil
+from config import win, lose, RED, GREEN, YELLOW, BLUE, MAGENTA, RESET, line, change_line
 
 cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11]
 cardsName = ["1","2","3","4","5","6","7","8","9","10","Jack","Queen","King","Ace"]
-
-#Get console width
-columns, _ = shutil.get_terminal_size()
-
-#Create a line that spans the width of the screen
-line = '_' * columns
-
-winB=0
-loseB=0
-
-#Setting up colours
-RED = "\033[31m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-BLUE = "\033[34m"
-MAGENTA = "\033[35m"
-RESET = "\033[0m"
 
 def draw_card():
     playerCard = random.randint(0, 13)
@@ -62,15 +45,24 @@ while continue_playing == True:
         print("")
         if playerScore == 21 and aiScore != 21:
             print("You've got 21! You win!")
-            winB+=1
+            win+=1
+            change_line("info.txt", 1, str(win))
         elif aiScore == 21 and playerScore != 21:
             print("AI's got 21, you lose...")
-            loseB+=1
+            lose+=1
+            change_line("info.txt", 2, str(lose))
         elif playerScore > 21 and aiScore < 22:
             print("You've gone bust, you lose...")
-            loseB+=1
+            lose+=1
+            change_line("info.txt", 2, str(lose))
         elif aiScore > 21 and playerScore < 22:
             print("AI went bust! You win!")
-            winB+=1
+            win+=1
+            change_line("info.txt", 1, str(win))
         continue_playing = False
 
+print("")
+print(line)
+print("")
+
+subprocess.run(["python", "mainmenu.py"])

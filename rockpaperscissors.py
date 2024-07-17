@@ -1,28 +1,11 @@
 import random
 import subprocess
-import shutil
+from config import win, lose, RED, GREEN, YELLOW, BLUE, MAGENTA, RESET, line, change_line
 
 #Setting up where each value will be stored into
 rock = 1
 paper = 2
 scissor = 3
-
-#Get console width
-columns, _ = shutil.get_terminal_size()
-
-#Create a line that spans the width of the screen
-line = '_' * columns
-
-winRPS=0
-loseRPS=0
-
-#Setting up colours
-RED = "\033[31m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-BLUE = "\033[34m"
-MAGENTA = "\033[35m"
-RESET = "\033[0m"
 
 #Console writting with game rules (the values descriptions will be displayed on the console with the colour as per the code)
 print("Welcome to Rock, Paper and Scissors!")
@@ -97,10 +80,12 @@ result = rock_paper_scissor_ai(answerInt)
 
 if result == 1:
     print(f"{GREEN}You win!{RESET}")
-    winRPS+=1
+    win+=1
+    change_line("info.txt", 1, str(win))
 elif result == 2:
     print(f"{RED}You lost...{RESET}")
-    loseRPS+=1
+    lose+=1
+    change_line("info.txt", 2, str(lose))
 elif result == 3:
     print(f"{YELLOW}A draw...{RESET}")
     
@@ -108,4 +93,4 @@ print("")
 print(line)
 print("")
 
-subprocess.run(["python", "main.py"])
+subprocess.run(["python", "mainmenu.py"])

@@ -1,35 +1,28 @@
 import subprocess
 import os
-import platform
-from rockpaperscissors import winRPS, loseRPS
-from blackjack import winB, loseB
 
-win = winB + winRPS
-lose = loseB + loseRPS
+content = """0
+0
+0
+"""
 
-# Function to clear the terminal
-def clear_terminal():
-    # Check the operating system
-    current_os = platform.system()
+#Delete file so it resets the values from the previous time without corrupting the file
+def delete_file(file_path):
+    try:
+        os.remove(file_path)
+    except FileNotFoundError:
+        print("File doesn't exist.")
+     
+#Recreate the file with the default values   
+def create_and_write_file(file_path, content):
+    try:
+        with open(file_path, 'w') as file:
+            file.write(content)
+        print(f"File '{file_path}' has been created and content has been written.")
+    except Exception as e:
+        print(f"Error: {e}")
+
+delete_file("info.txt")
+create_and_write_file("info.txt", content)
     
-    if current_os == "Windows":
-        os.system('cls')
-    else:
-        os.system('clear')
-
-# Call the function to clear the terminal
-clear_terminal()
-
-print("Which game would you like to play?\n")
-
-print("Current record W/L: ", win, "/", lose, "\n")
-
-print("Rock Paper Scissors: 1")
-print("Blackjack: 2\n")
-
-answer = int(input("You: "))
-
-if answer == 1:
-    subprocess.run(["python", "rockpaperscissors.py"])
-elif answer == 2:
-    subprocess.run(["python", "blackjack.py"])
+subprocess.run(["python", "mainmenu.py"])
