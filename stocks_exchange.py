@@ -1,101 +1,105 @@
-from config import RED, GREEN, YELLOW, BLUE, MAGENTA, RESET
 import pandas as pd
+from tabulate import tabulate
+from config import RED, GREEN, YELLOW, MAGENTA,BLUE, RESET
+import random
 
+# Load data
 stock_data = pd.read_csv("stock_exchange/stock.csv")
 balance_data = pd.read_csv("stock_exchange/balance.csv")
+balance = float(balance_data.iat[0,0])
+turn = int(balance_data.iat[1,0])
 my_stocks = None
 
-balance = balance_data.iat[0,0]
-stock_rows = stock_data.shape[0]
-
-def ask_user_action(answer):
-    if answer != "quit":
-        answer = int(answer)
-        while answer != 1 and answer != 2 and answer != 3:
-            if answer != 1 and answer != 2 and answer != 3:
-                print("\nPlease write a valid input.")
-                answer = input("You: ")
-    return answer
-
-def check_balance(balance, my_stocks):
-    print("\n£",balance)
-    print("These are your stocks: \n", my_stocks)
-
-def check_stock_change(x,stock_data):
-    data = False
-    previous = float(stock_data.iat[x,3])
-    current = float(stock_data.iat[x,4])
-    if current > previous:
-        data = True
-    return data
-
-def show_every_stock(stock_rows,stock_data):
-    y=0
-    change_stock=False
-    for x in range(stock_rows):
-        stock_name = stock_data.iat[y,0]
-        stock_code = stock_data.iat[y,1]
-        stock_price = stock_data.iat[y,4]
-        change_stock = check_stock_change(x,stock_data)
-        if change_stock == True:
-            print(f"\n{GREEN}{stock_name}{RESET}",f"{MAGENTA}{stock_code}{RESET}",f"{YELLOW}{stock_price}{RESET}")
-        else:
-            print(f"\n{RED}{stock_name}{RESET}",f"{MAGENTA}{stock_code}{RESET}",f"{YELLOW}{stock_price}{RESET}")
-        y+=1
-
-def purchase_stocks(stock_purchase_code,stock_purchase_shares,stock_data,stock_rows):
-    y=0
-    for x in range(stock_rows):
-        stock_code = stock_data.iat[y,1]
-        if stock_purchase_code == stock_code:
-            print("Found Match!")
-        else:
-            print("No Match Found...")
-        y+=1
+def get_valid_input(prompt, valid_options):
+    while True:
+        response = input(prompt)
+        if response.isdigit() and int(response) in valid_options:
+            return int(response)
+        print("Invalid input, please try again.")
 
 
+def display_menu():
+    show_stocks()
+    print("\nWhat would you like to do today?")
+    print("1: View Balance")
+    print("2: View Stock Market")
+    print("3: Advance a Day")
+    print("4: Quit")
+    return get_valid_input("Choose an option: ", {1, 2, 3, 4})
 
 
+def check_balance():
+    print(f"\nCurrent Balance: {BLUE}£{balance}{RESET}")
+    print(f"Your stocks: {BLUE}£{my_stocks}{RESET}")
 
-turn = 1    
-print("\nTurn: ",turn,"\n")
 
-print("\nWhat's your name?")
-name = input("You: ")
+def show_stocks():
+    formatted_stocks = []
+    for y in range(stock_data.shape[0]):
+        name, code, price = stock_data.iloc[y, [0, 1, 4]]
+        color = GREEN if stock_data.iloc[y, 4] > stock_data.iloc[y, 3] else RED
+        formatted_stocks.append([f"{color}{name}{RESET}", f"{MAGENTA}{code}{RESET}", f"{YELLOW}£{price}{RESET}"])
+    print(tabulate(formatted_stocks, headers=["Name", "Code", "Price"], tablefmt="grid"))
 
-answer = ""
-display_answer = ""
-stock_answer = ""
-stock_purchase_code = ""
-stock_purchase_shares = ""
 
-while answer != "quit":
-    print("\n",name," what would you like to do today?\n")
-    print("View Balance: 1\nView Stock Market: 2\nOr Advance a Day: 3\n")
+def purchase_stocks():
+    global balance  # Declare 'balance' as global at the beginning of the function
+    code = input("Enter the stock code you want to purchase: ")
+    shares = get_valid_input("How many shares would you like to buy? ", range(1, 100000))
+    found_match = False
+    for index, row in stock_data.iterrows():
+        if code == row['Code']:  # Assuming 'Symbol' is the column name for stock codes
+            found_match = True
+            total_cost = row['Current Price'] * shares  # Assuming 'Price' is the column name for stock prices
+            if balance >= total_cost:
+                balance -= total_cost
+                print(f"\n{GREEN}Purchase successful.{RESET} Remaining balance: £{balance}")
+                break  # Exit the loop as soon as a match is found and processed
+            else:
+                print(f"\n{RED}Insufficient balance.{RESET}")
+                break  # Exit the loop because there is no need to check further if the user can't afford this stock
 
-    answer = input("You: ")
-    answer = ask_user_action(answer)
+    if not found_match:
+        print("No match found.")
+
+
+def inflation_simulator():
+    random_change = random.gauss(drift, volatility)  # Gaussian distribution
+    new_price = previous_price * (1 + random_change)
+    return max(new_price, 0), positive
+    positive = random.choice([True, False])
     
-    if answer == 1:
-        check_balance(balance, my_stocks)
-    elif answer == 2:
-        print("\nWould you like for every stock available to be displayed (1), or a specific stock? (2).\n")
-        display_answer = input("You: ")
-        display_answer = ask_user_action(display_answer)
-        while display_answer == 3:
-            if display_answer == 3:
-                display_answer = ask_user_action(display_answer)
-        if display_answer == 1:
-            show_every_stock(stock_rows,stock_data)
-            print("\nIs there any you would like to invest in?\nYes: 1\nNo: 2")
-            stock_answer = input("You: ")
-            stock_answer = ask_user_action(stock_answer)
-            while stock_answer == 3:
-                if stock_answer == 3:
-                    stock_answer = ask_user_action(stock_answer)
-            if stock_answer == 1:
-                print("\nWhich stock do you want to get? (type stock code)")
-                stock_purchase_code = input("You: ")
-                print("And how many shares would you like?")
-                stock_purchase_shares = input("You: ")
-                purchase_stocks(stock_purchase_code,stock_purchase_shares,stock_data,stock_rows)
+def advance_day():
+    global turn, stock_data
+    turn += 1
+    print("Day: ", turn)
+    for index, row in stock_data.iterrows():
+        inflation, positive = inflation_simulator()
+        previous_price = row['Current Price']
+        if positive:
+            new_price = round(previous_price * (1 + inflation), 2)  # Calculate the new price after inflation
+        else:
+            new_price = round(previous_price * (1 - inflation), 2)  # Calculate the new price after deflation
+        
+        # Update the DataFrame
+        stock_data.at[index, 'Previous Price'] = previous_price
+        stock_data.at[index, 'Current Price'] = new_price
+        
+
+def main():
+    while True:
+        choice = display_menu()
+        if choice == 1:
+            check_balance()
+        elif choice == 2:
+            purchase_stocks()
+        elif choice == 3:
+            advance_day()
+        elif choice == 4:
+            print("Goodbye!")
+            break
+
+if __name__ == "__main__":
+    print("Welcome to the Stock Exchange Game!")
+    print("Day: ",turn)
+    main()
