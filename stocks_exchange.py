@@ -97,6 +97,16 @@ def calculate_personal_stock_value():
     show_stocks()
     
     
+def calculate_specific_stock_value(code,shares):
+    correct_row = stock_data[stock_data['Code'] == code]
+    current_price = correct_row['Current Price'].values[0]
+    print("Current Price: ", current_price)
+    
+    sale_value = current_price * shares
+    
+    return sale_value
+    
+    
 def inflation_simulator(previous_price,volatility=0.07):
     dt = 1  # One time step; e.g., one day
     drift = np.random.uniform(-0.0005, 0.0005)
@@ -129,6 +139,7 @@ def advance_day():
         
         
 def sell_stock():
+    global balance
     print("\n",my_stocks_shares)
     print("Any particular stock you'd like to sell?")
     print("1: Yes")
@@ -138,8 +149,19 @@ def sell_stock():
         print("Please write the code of which stock you'd like to sell.")
         code = input("Enter the stock code you want to purchase: ")
         shares = get_valid_input("How many shares would you like to sell? ", range(1, 100000))
+        x=0
+        try:
+            sale_value = calculate_specific_stock_value(code,shares)
+            if my_stocks_shares[code] >= shares:
+                my_stocks_shares[code] -= shares
+                balance += sale_value
+                calculate_personal_stock_value()
+                show_stocks()
+            else:
+                print(f"You don't have enough stocks, owned: {my_stocks_shares[code]}, asked: {shares}.")
+        except ValueError:
+            print("Not such code exists, try again using a valid code!")
         
-
 
 def main():
     calculate_personal_stock_value()
